@@ -1,0 +1,21 @@
+service: linkpulse-api
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1 # Change this to your preferred AWS region
+
+functions:
+  app:
+    handler: handler.handler
+    timeout: 30
+    events:
+      - httpApi:
+          path: /
+          method: get
+      - httpApi:
+          path: /{proxy+}
+          method: any
