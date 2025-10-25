@@ -56,7 +56,7 @@ async function extractLinks(pageUrl) {
       // Skip invalid URLs
     }
   });
-
+  console.log(links);
   return links;
 }
 

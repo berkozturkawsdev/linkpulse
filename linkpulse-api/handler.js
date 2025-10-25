@@ -17,14 +17,22 @@ app.post("/scan", async (req, res) => {
       .status(400)
       .json({ error: "Missing or invalid 'query' parameter." });
   }
+
   if (!isValidUrl(query)) {
     return res.status(400).json({ error: "Invalid URL format." });
   }
 
   try {
-    const links = await extractLinks(query);
+    let links = await extractLinks(query);
+
+    // Limit links based on env variable
+    const maxLinks = parseInt(process.env.MAX_LINKS) || 50; // default 50
+    if (links.length > maxLinks) {
+      links = links.slice(0, maxLinks);
+    }
+
     const results = await checkLinks(links);
-    res.json({ results });
+    res.json({ results, scanned: links.length, totalFound: links.length });
   } catch (err) {
     if (err.status === 403) {
       return res.status(500).json({
