@@ -1,37 +1,60 @@
-import axios from "axios";
 import { useState } from "react";
+import "./App.css";
+import LinksTable from "./LinksTable";
 
 export default function App() {
   const [input, setInput] = useState("");
-  const [result, setResult] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState([]);
 
   const handleScan = async () => {
+    setIsLoading(true);
+    setIsDisabled(true);
+    setError("");
+    setResult([]);
+
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/scan`, {
-        query: input, // send whatever user entered
+      const response = await fetch(import.meta.env.VITE_API_URL + "/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: input }),
       });
-      setResult(res.data.result);
+
+      const data = await response.json();
+      if (!response.ok) {
+        if (data.code === "FORBIDDEN_LINK") {
+          setError(
+            "We couldn’t check this link because the site blocked automated requests. You may need to check it manually."
+          );
+        } else {
+          throw new Error(`Server error: ${response.status}`);
+        }
+      }
+      setResult(data.results);
     } catch (err) {
-      console.error(err);
+      setError(
+        "Something went wrong while checking the site. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+      setIsDisabled(false);
     }
   };
+
+  const showTable = result && result.length > 0;
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center text-gray-800">
+    <div
+      id="host"
+      className="min-h-screen bg-gray-50 flex flex-col items-center text-gray-800"
+    >
       {/* Header */}
       <header className="w-full py-6 bg-white shadow-sm">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-6">
-          <h1 className="text-2xl font-bold text-indigo-600">LinkSleuth</h1>
-          <nav className="space-x-6">
-            <a href="#features" className="hover:text-indigo-600">
-              Features
-            </a>
-            <a href="#pricing" className="hover:text-indigo-600">
-              Pricing
-            </a>
-            <a href="#contact" className="hover:text-indigo-600">
-              Contact
-            </a>
-          </nav>
+          <h1 className="text-2xl font-bold text-indigo-600">LinkCheckr</h1>
+          <nav className="space-x-6"></nav>
         </div>
       </header>
 
@@ -53,35 +76,62 @@ export default function App() {
             className="border border-gray-300 rounded-xl px-4 py-3 w-72 focus:ring-2 focus:ring-indigo-500 outline-none"
           />
           <button
-            onClick={() => handleScan()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl shadow"
+            onClick={handleScan}
+            disabled={isDisabled}
+            className={`flex items-center justify-center space-x-2 font-semibold px-6 py-3 rounded-xl shadow-md transition-all duration-200 ${
+              isDisabled
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700 text-white"
+            }`}
           >
-            Check Now
+            {isLoading && (
+              <svg
+                className="w-5 h-5 text-white animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+            )}
+            <span>{isLoading ? "Scanning..." : "Check Now"}</span>
           </button>
         </div>
-        <p className="text-sm text-gray-500 mt-3">
-          No signup required for your first scan.
-        </p>
+
+        {/* Error feedback */}
+        {error && (
+          <div className="mt-8 text-red-500 font-medium bg-red-50 border border-red-200 px-4 py-2 rounded-lg w-72 text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Result feedback */}
+        {showTable && <LinksTable results={result} />}
       </section>
 
       {/* Features */}
       <section id="features" className="mt-24 max-w-5xl mx-auto px-6">
         <h3 className="text-3xl font-bold text-center mb-12">
-          Why LinkSleuth?
+          Why LinkCheckr?
         </h3>
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-2 gap-10">
           <div className="p-6 bg-white rounded-2xl shadow hover:shadow-md transition">
             <h4 className="text-xl font-semibold mb-2">🚦 Fast Scanning</h4>
             <p className="text-gray-600">
               Instantly crawl your site and check all links in parallel for
               broken, redirected, or slow responses.
-            </p>
-          </div>
-          <div className="p-6 bg-white rounded-2xl shadow hover:shadow-md transition">
-            <h4 className="text-xl font-semibold mb-2">📬 Email Alerts</h4>
-            <p className="text-gray-600">
-              Get notified when new broken links appear — before your visitors
-              notice.
             </p>
           </div>
           <div className="p-6 bg-white rounded-2xl shadow hover:shadow-md transition">
@@ -94,43 +144,13 @@ export default function App() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="mt-24 bg-white w-full py-20 border-t">
-        <div className="max-w-5xl mx-auto text-center px-6">
-          <h3 className="text-3xl font-bold mb-8">Simple Pricing</h3>
-          <div className="grid md:grid-cols-2 gap-10">
-            <div className="p-8 border rounded-2xl shadow-sm">
-              <h4 className="text-2xl font-semibold mb-3">Free</h4>
-              <p className="text-gray-600 mb-4">Manual scans for one site.</p>
-              <p className="text-3xl font-bold mb-6">$0</p>
-              <button className="border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-6 py-3 rounded-xl transition">
-                Try Now
-              </button>
-            </div>
-            <div className="p-8 border-2 border-indigo-600 rounded-2xl shadow-md">
-              <h4 className="text-2xl font-semibold mb-3">Pro</h4>
-              <p className="text-gray-600 mb-4">
-                Automatic weekly scans + email alerts.
-              </p>
-              <p className="text-3xl font-bold mb-6">
-                $5<span className="text-lg text-gray-600">/mo</span>
-              </p>
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl transition">
-                Upgrade
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer
         id="contact"
         className="w-full py-10 bg-gray-900 text-gray-300 mt-24"
       >
         <div className="max-w-6xl mx-auto text-center">
-          <p>© {new Date().getFullYear()} LinkSleuth. All rights reserved.</p>
-          <p className="mt-2 text-sm">Built with ❤️ by Berk.</p>
+          <p>© {new Date().getFullYear()} LinkCheckr. All rights reserved.</p>
         </div>
       </footer>
     </div>

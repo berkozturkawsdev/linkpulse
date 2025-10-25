@@ -6,17 +6,12 @@ const {
   extractLinks,
   checkLinks,
 } = require("./utils");
-
+const s3Utils = require("./s3utils");
 const app = express();
 app.use(express.json());
 
-// Configure S3
-const s3 = new S3Client({ region: "eu-central-1" }); // change region
-const BUCKET_NAME = "boz-linkpulse-result"; // replace with your bucket
-
 app.post("/scan", async (req, res) => {
   const { query } = req.body;
-  console.log("Received:", query);
 
   if (!isValidInput(query)) {
     return res
@@ -32,7 +27,13 @@ app.post("/scan", async (req, res) => {
     const results = await checkLinks(links);
     res.json({ results });
   } catch (err) {
-    console.error(err);
+    console.log(err.status);
+    return res.status(403).json({
+      error:
+        "Site blocked the request (403 Forbidden). Cannot verify this link automatically.",
+      code: "FORBIDDEN_LINK",
+    });
+
     res.status(500).json({ error: "Failed to scan the URL." });
   }
 });
