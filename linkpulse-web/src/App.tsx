@@ -58,12 +58,12 @@ export default function App() {
         style={{ backgroundColor: "var(--color-background)" }}
       >
         <div className="max-w-6xl mx-auto flex justify-between items-center px-6">
-          <h1
-            className="text-2xl font-bold"
-            style={{ color: "var(--color-primary)" }}
-          >
-            LinkCheckr
+          <h1 className="text-2xl font-bold">
+            <a href="/" style={{ color: "var(--color-primary)" }}>
+              LinkCheckr
+            </a>
           </h1>
+
           <nav className="space-x-6"></nav>
         </div>
       </header>
