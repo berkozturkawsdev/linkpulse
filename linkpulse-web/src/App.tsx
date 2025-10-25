@@ -23,6 +23,7 @@ export default function App() {
       });
 
       const data = await response.json();
+      console.log(data);
       if (!response.ok) {
         if (data.code === "FORBIDDEN_LINK") {
           setError(
@@ -31,7 +32,12 @@ export default function App() {
         } else {
           throw new Error(`Server error: ${response.status}`);
         }
+      } else if (data.errorType === "LambdaTimeoutError") {
+        setError(
+          "Scanning took too long and timed out. Try checking a smaller page or try again later."
+        );
       }
+
       setResult(data.results);
     } catch (err) {
       setError(

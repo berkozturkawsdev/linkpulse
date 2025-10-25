@@ -6,7 +6,6 @@ const {
   extractLinks,
   checkLinks,
 } = require("./utils");
-const s3Utils = require("./s3utils");
 const app = express();
 app.use(express.json());
 
@@ -27,12 +26,13 @@ app.post("/scan", async (req, res) => {
     const results = await checkLinks(links);
     res.json({ results });
   } catch (err) {
-    console.log(err.status);
-    return res.status(403).json({
-      error:
-        "Site blocked the request (403 Forbidden). Cannot verify this link automatically.",
-      code: "FORBIDDEN_LINK",
-    });
+    if (err.status === 403) {
+      return res.status(500).json({
+        error:
+          "Site blocked the request (403 Forbidden). Cannot verify this link automatically.",
+        code: "FORBIDDEN_LINK",
+      });
+    }
 
     res.status(500).json({ error: "Failed to scan the URL." });
   }
