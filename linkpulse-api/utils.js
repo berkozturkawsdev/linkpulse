@@ -17,18 +17,11 @@ function isValidInput(query) {
   return typeof query === "string" && query.trim().length > 0;
 }
 
-/**
- * Validate a URL format (http or https)
- * @param {string} query
- * @returns {boolean}
- */
-function isValidUrl(query) {
-  try {
-    const url = new URL(query);
-    return ["http:", "https:"].includes(url.protocol);
-  } catch {
-    return false;
+function ensureHttps(query) {
+  if (!/^https?:\/\//i.test(query)) {
+    return `https://${query}`;
   }
+  return query;
 }
 
 /**
@@ -56,7 +49,6 @@ async function extractLinks(pageUrl) {
       // Skip invalid URLs
     }
   });
-  console.log(links);
   return links;
 }
 
@@ -114,4 +106,4 @@ async function checkLinks(urls, concurrency = 10) {
   return results;
 }
 
-module.exports = { isValidInput, isValidUrl, extractLinks, checkLinks };
+module.exports = { isValidInput, ensureHttps, extractLinks, checkLinks };

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./App.css";
 import LinksTable from "./LinksTable";
+import InfoBox from "./InfoBox";
+import ErrorDisplay from "./ErrorDisplay";
 
 export default function App() {
   const [input, setInput] = useState("");
@@ -55,11 +57,11 @@ export default function App() {
       {/* Header */}
       <header
         className="w-full py-6 shadow-sm"
-        style={{ backgroundColor: "var(--color-background)" }}
+        style={{ backgroundColor: "var(--color-dark)" }}
       >
         <div className="max-w-6xl mx-auto flex justify-between items-center px-6">
           <h1 className="text-2xl font-bold">
-            <a href="/" style={{ color: "var(--color-primary)" }}>
+            <a href="/" style={{ color: "var(--color-white)" }}>
               LinkCheckr
             </a>
           </h1>
@@ -70,10 +72,7 @@ export default function App() {
 
       {/* Hero Section */}
       <section className="flex flex-col items-center text-center mt-20 px-6">
-        <h2
-          className="text-4xl md:text-5xl font-bold mb-4"
-          style={{ color: "white" }}
-        >
+        <h2 className="text-4xl md:text-5xl font-bold mb-4">
           Find Broken Links Before Your Visitors Do
         </h2>
         <p
@@ -91,22 +90,16 @@ export default function App() {
             placeholder="Enter your website URL"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="border border-gray-600 rounded-xl px-4 py-3 w-72 focus:ring-2 outline-none"
-            style={{
-              backgroundColor: "#2a2a2a",
-              color: "white",
-              borderColor: "var(--color-text-light)",
-            }}
+            className="search-input border rounded-lg px-4 py-3 w-100 focus:ring-2 outline-none"
           />
           <button
             onClick={handleScan}
             disabled={isDisabled}
-            className={`flex items-center justify-center space-x-2 font-semibold px-6 py-3 rounded-xl shadow-md transition-all duration-200 ${
+            className={`btn flex items-center justify-center space-x-2 font-semibold px-6 py-3 rounded shadow-md transition-all duration-200 ${
               isDisabled
-                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                ? "cursor-not-allowed"
                 : "hover:brightness-110 text-white"
             }`}
-            style={{ backgroundColor: "var(--color-primary)" }}
           >
             {isLoading && (
               <svg
@@ -135,18 +128,7 @@ export default function App() {
         </div>
 
         {/* Error feedback */}
-        {error && (
-          <div
-            className="mt-8 font-medium px-4 py-2 rounded-lg w-72 text-center"
-            style={{
-              backgroundColor: "#3a1f1f",
-              color: "#ff6b6b",
-              border: "1px solid #ff6b6b",
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <ErrorDisplay error={error}></ErrorDisplay>}
 
         {/* Result table */}
         {showTable && <LinksTable results={result} />}
@@ -154,52 +136,32 @@ export default function App() {
 
       {/* Features */}
       <section id="features" className="mt-24 max-w-5xl mx-auto px-6">
-        <h3
-          className="text-3xl font-bold text-center mb-12"
-          style={{ color: "white" }}
-        >
+        <h3 className="text-3xl font-bold text-center mb-12">
           Why LinkCheckr?
         </h3>
         <div className="grid md:grid-cols-2 gap-10">
-          <div
-            className="p-6 rounded-2xl shadow hover:shadow-lg transition"
-            style={{ backgroundColor: "#242424" }}
-          >
-            <h4
-              className="text-xl font-semibold mb-2"
-              style={{ color: "var(--color-primary)" }}
-            >
-              🚦 Fast Scanning
-            </h4>
-            <p className="text-text-light">
-              Instantly crawl your site and check all links in parallel for
-              broken, redirected, or slow responses.
-            </p>
-          </div>
-          <div
-            className="p-6 rounded-2xl shadow hover:shadow-lg transition"
-            style={{ backgroundColor: "#242424" }}
-          >
-            <h4
-              className="text-xl font-semibold mb-2"
-              style={{ color: "var(--color-primary)" }}
-            >
-              📊 Simple Reports
-            </h4>
-            <p className="text-text-light">
-              See detailed reports with link status, response times, and SEO
-              impact summaries.
-            </p>
-          </div>
+          <InfoBox
+            title="🚦 Fast Scanning"
+            text="See detailed reports with link status, response times, and SEO
+              impact summaries."
+          ></InfoBox>
+          <InfoBox
+            title="📊 Simple Reports"
+            text="Instantly crawl your site and check all links in parallel for
+              broken, redirected, or slow responses."
+          ></InfoBox>
         </div>
       </section>
 
       {/* Footer */}
       <footer
         className="w-full py-10 mt-24"
-        style={{ backgroundColor: "#191414", color: "var(--color-text-light)" }}
+        style={{
+          backgroundColor: "var(--color-dark)",
+          color: "var(--color-white)",
+        }}
       >
-        <div className="max-w-6xl mx-auto text-center">
+        <div className="max-w-6xl mx-auto text-center text-sm">
           <p>© {new Date().getFullYear()} LinkCheckr. All rights reserved.</p>
         </div>
       </footer>

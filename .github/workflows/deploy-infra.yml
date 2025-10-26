@@ -1,0 +1,47 @@
+name: Deploy Infrastructure to AWS
+
+on:
+  push:
+    branches:
+      - main # deploy only from main branch
+  workflow_dispatch: # allow manual trigger from GitHub UI
+
+env:
+  AWS_REGION: eu-west-1
+  CDK_STACK_NAME: linkpulse-infra-stack
+  CDK_APP_PATH: linkpulse-infra # folder where your CDK app is
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: Install dependencies
+        working-directory: ${{ env.CDK_APP_PATH }}
+        run: npm ci
+
+      - name: Synthesize CloudFormation template
+        working-directory: ${{ env.CDK_APP_PATH }}
+        run: npx cdk synth
+
+      - name: Deploy CDK Stack
+        working-directory: ${{ env.CDK_APP_PATH }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: npx cdk deploy ${{ env.CDK_STACK_NAME }} --require-approval never

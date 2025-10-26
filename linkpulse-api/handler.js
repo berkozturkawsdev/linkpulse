@@ -2,7 +2,7 @@ const express = require("express");
 const serverless = require("serverless-http");
 const {
   isValidInput,
-  isValidUrl,
+  ensureHttps,
   extractLinks,
   checkLinks,
 } = require("./utils");
@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.post("/scan", async (req, res) => {
-  const { query } = req.body;
+  let { query } = req.body;
 
   if (!isValidInput(query)) {
     return res
@@ -18,10 +18,7 @@ app.post("/scan", async (req, res) => {
       .json({ error: "Missing or invalid 'query' parameter." });
   }
 
-  if (!isValidUrl(query)) {
-    return res.status(400).json({ error: "Invalid URL format." });
-  }
-
+  query = ensureHttps(query);
   try {
     let links = await extractLinks(query);
 

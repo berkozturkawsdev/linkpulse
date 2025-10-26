@@ -8,16 +8,12 @@ export default function LinksTable({ results }) {
   return (
     <div className="overflow-x-auto w-full max-w-5xl mx-auto mt-10">
       <table className="min-w-full rounded-xl overflow-hidden">
-        <thead className="bg-[#1DB954] text-white uppercase text-sm tracking-wide shadow-sm">
+        <thead className="table-header text-white uppercase text-sm tracking-wide shadow-sm">
           <tr>
-            <th className="py-3 px-6 text-left text-sm font-medium">URL</th>
-            <th className="py-3 px-6 text-center text-sm font-medium">
-              Status
-            </th>
-            <th className="py-3 px-6 text-center text-sm font-medium">
-              Broken
-            </th>
-            <th className="py-3 px-6 text-left text-sm font-medium">Message</th>
+            <th className="py-3 px-6 text-left text-sm ">URL</th>
+            <th className="py-3 px-6 text-center text-sm ">Status</th>
+            <th className="py-3 px-6 text-center text-sm ">Broken</th>
+            <th className="py-3 px-6 text-left text-sm ">Message</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-800">
@@ -25,40 +21,34 @@ export default function LinksTable({ results }) {
             <tr
               key={idx}
               className={`transition duration-150 ${
-                link.broken
-                  ? "bg-red-900 hover:bg-red-800"
-                  : "bg-[#191414] hover:bg-[#222222]"
+                link.broken ? "table-row-error" : "table-row-success"
               }`}
             >
-              <td className="py-3 px-6 break-all text-[#1DB954] hover:underline">
+              <td className="py-3 text-sm px-6 break-all  hover:underline">
                 <a href={link.url} target="_blank" rel="noopener noreferrer">
                   {link.url}
                 </a>
               </td>
-              <td className="py-3 px-6 text-center text-[#B3B3B3] font-medium">
-                {link.status}
-              </td>
-              <td className="py-3 px-6 text-center">
+              <td className="py-3 text-sm px-6 text-center  ">{link.status}</td>
+              <td className="py-3 text-sm px-6 text-center">
                 {link.broken ? (
-                  <div className="flex items-center justify-center space-x-1 text-red-500">
+                  <div className="flex items-center justify-center space-x-1 ">
                     <XCircleIcon className="w-5 h-5" />
                     <span>Yes</span>
                   </div>
                 ) : link.status >= 300 && link.status < 400 ? (
-                  <div className="flex items-center justify-center space-x-1 text-yellow-400">
+                  <div className=" text-sm flex items-center justify-center space-x-1 ">
                     <ExclamationTriangleIcon className="w-5 h-5" />
                     <span>Redirect</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center space-x-1 text-[#1DB954]">
+                  <div className=" text-sm flex items-center justify-center space-x-1 ">
                     <CheckCircleIcon className="w-5 h-5" />
                     <span>No</span>
                   </div>
                 )}
               </td>
-              <td className="py-3 px-6 text-[#B3B3B3] text-sm">
-                {link.message || "-"}
-              </td>
+              <td className="py-3 px-6  text-sm ">{link.message || "-"}</td>
             </tr>
           ))}
         </tbody>
