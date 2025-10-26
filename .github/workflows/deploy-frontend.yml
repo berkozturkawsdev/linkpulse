@@ -1,0 +1,60 @@
+name: Deploy Frontend to S3 + CloudFront
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "linkpulse-web/**" # only trigger if frontend files change
+  workflow_dispatch: # allow manual trigger
+
+env:
+  AWS_REGION: eu-west-1
+  FRONTEND_PATH: linkpulse-web
+  BUILD_DIR: dist
+  LINKPULSE_FRONTEND_BUCKET: ${{ secrets.LINKPULSE_FRONTEND_BUCKET }} # stored in GitHub Secrets
+  LINKPULSE_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.LINKPULSE_CLOUDFRONT_DISTRIBUTION_ID }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_PATH }}
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ${{ env.FRONTEND_PATH }}
+        run: npm run build:prod
+
+      - name: List built files
+        working-directory: ${{ env.FRONTEND_PATH }}/${{ env.BUILD_DIR }}
+        run: ls -al
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ${{ env.FRONTEND_PATH }}/${{ env.BUILD_DIR }}/ s3://${{ env.LINKPULSE_FRONTEND_BUCKET }} --delete
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ env.LINKPULSE_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
