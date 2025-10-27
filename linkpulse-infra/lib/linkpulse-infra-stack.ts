@@ -38,7 +38,7 @@ export class LinkpulseInfraStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
-
+    const oai = new cloudfront.OriginAccessIdentity(this, "LinkpulseOAI");
     // === CloudFront distribution ===
     const distribution = new cloudfront.Distribution(
       this,
@@ -46,11 +46,7 @@ export class LinkpulseInfraStack extends cdk.Stack {
       {
         defaultBehavior: {
           origin: new origins.S3Origin(siteBucket, {
-            // This automatically creates an OAI and grants read access
-            originAccessIdentity: new cloudfront.OriginAccessIdentity(
-              this,
-              "OAI"
-            ),
+            originAccessIdentity: oai, // <-- attach the OAI
           }),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -71,7 +67,7 @@ export class LinkpulseInfraStack extends cdk.Stack {
         defaultRootObject: "index.html",
       }
     );
-
+    siteBucket.grantRead(oai);
     // === Outputs ===
     new cdk.CfnOutput(this, "CloudFrontURL", {
       value: distribution.distributionDomainName,
