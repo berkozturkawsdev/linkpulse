@@ -12,6 +12,7 @@ env:
   AWS_REGION: eu-west-1
   CDK_STACK_NAME: LinkpulseInfraStack
   CDK_APP_PATH: linkpulse-infra # folder where your CDK app is
+  ACM_CERT_ARN: ${{ secrets.ACM_CERT_ARN }}
 
 permissions:
   contents: read

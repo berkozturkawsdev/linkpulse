@@ -5,6 +5,7 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 
 export class LinkpulseInfraStack extends cdk.Stack {
@@ -39,6 +40,7 @@ export class LinkpulseInfraStack extends cdk.Stack {
       autoDeleteObjects: true,
     });
     const oai = new cloudfront.OriginAccessIdentity(this, "LinkpulseOAI");
+    const certificateArn = process.env.ACM_CERT_ARN!;
     // === CloudFront distribution ===
     const distribution = new cloudfront.Distribution(
       this,
@@ -65,6 +67,12 @@ export class LinkpulseInfraStack extends cdk.Stack {
           },
         },
         defaultRootObject: "index.html",
+        domainNames: ["linkcheckr.bozapps.com"],
+        certificate: acm.Certificate.fromCertificateArn(
+          this,
+          "Cert",
+          certificateArn
+        ),
       }
     );
     siteBucket.grantRead(oai);
