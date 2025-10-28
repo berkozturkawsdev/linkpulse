@@ -45,8 +45,8 @@ export class LinkpulseInfraStack extends cdk.Stack {
       "LinkpulseDistribution",
       {
         defaultBehavior: {
-          origin: new origins.S3Origin(siteBucket, {
-            originAccessIdentity: oai, // <-- attach the OAI
+          origin: origins.S3BucketOrigin.withOriginAccessIdentity(siteBucket, {
+            originAccessIdentity: oai,
           }),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
